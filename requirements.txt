@@ -1,0 +1,8 @@
+os
+colorama
+ipinfo
+requests
+time
+socket
+subprocess
+ipaddress
