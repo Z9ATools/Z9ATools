@@ -7,6 +7,10 @@ import time
 import socket
 import subprocess
 import ipaddress
+import phonenumbers
+from phonenumbers import geocoder, carrier
+import hashlib
+import base64
 
 def check_os():
     if os.name == 'nt':
@@ -148,13 +152,237 @@ def ip_pinger():
     return_to_menu()
 
 
+def username_tracker():
+    check_os()
+    print(Fore.CYAN + banner)
+    username = input(Fore.CYAN + "\nEnter the username to check: " + Style.RESET_ALL)
+
+    print(Fore.CYAN + f"\n[+] Checking username '{username}' across multiple sites...\n")
+
+    sites = {
+        "Twitter": f"https://twitter.com/{username}",
+        "Instagram": f"https://www.instagram.com/{username}",
+        "Facebook": f"https://www.facebook.com/{username}",
+        "TikTok": f"https://www.tiktok.com/@{username}",
+        "YouTube": f"https://www.youtube.com/@{username}",
+        "Reddit": f"https://www.reddit.com/user/{username}",
+        "Pinterest": f"https://www.pinterest.com/{username}/",
+        "GitHub": f"https://github.com/{username}",
+        "GitLab": f"https://gitlab.com/{username}",
+        "Twitch": f"https://www.twitch.tv/{username}",
+        "Steam": f"https://steamcommunity.com/id/{username}",
+        "DeviantArt": f"https://www.deviantart.com/{username}",
+        "Flickr": f"https://www.flickr.com/people/{username}/",
+        "Vimeo": f"https://vimeo.com/{username}",
+        "Medium": f"https://medium.com/@{username}",
+        "Spotify": f"https://open.spotify.com/user/{username}",
+        "AskFM": f"https://ask.fm/{username}",
+        "Telegram": f"https://t.me/{username}",
+        "Replit": f"https://replit.com/@{username}",
+        "Kaggle": f"https://www.kaggle.com/{username}",
+        "HackerNews": f"https://news.ycombinator.com/user?id={username}",
+        "Keybase": f"https://keybase.io/{username}",
+        "Codeforces": f"https://codeforces.com/profile/{username}",
+        "Wattpad": f"https://www.wattpad.com/user/{username}",
+        "Roblox": f"https://www.roblox.com/user.aspx?username={username}",
+        "Tumblr": f"https://{username}.tumblr.com",
+        "Blogger": f"https://{username}.blogspot.com",
+        "Snapchat": f"https://www.snapchat.com/add/{username}"
+    }
+
+    headers = {"User-Agent": "Mozilla/5.0"}
+    for site, url in sites.items():
+        try:
+            response = requests.get(url, headers=headers, timeout=5)
+            if response.status_code == 200:
+                print(Fore.GREEN + f"[+] Found on {site}: {url}")
+            elif response.status_code == 404:
+                print(Fore.RED + f"[-] Not found on {site}")
+            else:
+                print(Fore.YELLOW + f"[?] Unknown status on {site} ({response.status_code})")
+        except requests.RequestException:
+            print(Fore.YELLOW + f"[!] Error checking {site}")
+
+    return_to_menu()
+
+
+def email_lookup():
+    check_os()
+    print(Fore.CYAN + banner)
+    email = input(Fore.CYAN + "\nEnter the email address to check: " + Style.RESET_ALL).strip()
+    api_key = input(Fore.YELLOW + "\nEnter your HaveIBeenPwned API key: " + Style.RESET_ALL).strip()
+
+    url = f"https://haveibeenpwned.com/api/v3/breachedaccount/{email}"
+    headers = {
+        "hibp-api-key": api_key,
+        "user-agent": "Z9ATools-EmailLookup/1.0",
+    }
+
+    print(Fore.CYAN + f"\n[+] Checking data breaches for: {email}\n")
+    time.sleep(1.6)  # Respect rate limit (1.5s)
+
+    try:
+        response = requests.get(url, headers=headers, params={"truncateResponse": False})
+
+        if response.status_code == 200:
+            breaches = response.json()
+            print(Fore.GREEN + f"[+] {email} was found in {len(breaches)} breach(es):\n")
+            for b in breaches:
+                print(Fore.YELLOW + f"- {b['Name']} ({b['Domain']}) | Breach date: {b['BreachDate']}")
+        elif response.status_code == 404:
+            print(Fore.RED + f"[-] No breaches found for {email}.")
+        elif response.status_code == 401:
+            print(Fore.RED + "[!] Invalid API key.")
+        elif response.status_code == 429:
+            print(Fore.RED + "[!] Rate limited. Please wait before trying again.")
+        else:
+            print(Fore.RED + f"[!] Unexpected error: HTTP {response.status_code}")
+    except Exception as e:
+        print(Fore.RED + f"[!] Error: {e}")
+
+    return_to_menu()
+
+
+
+def phone_lookup():
+    check_os()
+    print(Fore.CYAN + banner)
+    number = input(Fore.CYAN + "\nEnter the phone number (with country code, e.g. +33612345678): " + Style.RESET_ALL).strip()
+
+    try:
+        parsed = phonenumbers.parse(number, None)
+
+        if not phonenumbers.is_possible_number(parsed) or not phonenumbers.is_valid_number(parsed):
+            print(Fore.RED + "[!] Invalid phone number.")
+        else:
+            region = geocoder.description_for_number(parsed, "en")
+            operator = carrier.name_for_number(parsed, "en")
+            country_code = parsed.country_code
+            national_number = parsed.national_number
+
+            print(Fore.GREEN + "\n[+] Phone Number Information:\n")
+            print(Fore.CYAN + f"• Country Code : +{country_code}")
+            print(f"• Carrier      : {operator if operator else 'Unknown'}")
+            print(f"• Region       : {region if region else 'Unknown'}")
+            print(f"• Number       : {national_number}")
+    except Exception as e:
+        print(Fore.RED + f"[!] Error: {e}")
+
+    return_to_menu()
+
+
+def encode_decode():
+    check_os()
+    print(Fore.CYAN + banner)
+    print(Fore.CYAN + "[1] Encode (hash/Base64/Hex)")
+    print(Fore.CYAN + "[2] Decode (Base64/Hex)")
+    choice = input(Fore.CYAN + "\nChoose option: " + Style.RESET_ALL)
+
+    if choice == '1':
+        data = input(Fore.CYAN + "\nEnter text to encode: " + Style.RESET_ALL).encode()
+        print(Fore.CYAN + "\nChoose encoding type:")
+        print("[1] MD5")
+        print("[2] SHA1")
+        print("[3] SHA256")
+        print("[4] SHA512")
+        print("[5] Base64")
+        print("[6] Hex")
+        enc_choice = input(Fore.CYAN + "\nYour choice: " + Style.RESET_ALL)
+
+        if enc_choice == '1':
+            result = hashlib.md5(data).hexdigest()
+        elif enc_choice == '2':
+            result = hashlib.sha1(data).hexdigest()
+        elif enc_choice == '3':
+            result = hashlib.sha256(data).hexdigest()
+        elif enc_choice == '4':
+            result = hashlib.sha512(data).hexdigest()
+        elif enc_choice == '5':
+            result = base64.b64encode(data).decode()
+        elif enc_choice == '6':
+            result = data.hex()
+        else:
+            print(Fore.RED + "[!] Invalid encoding choice.")
+            return_to_menu()
+            return
+
+        print(Fore.GREEN + f"\nEncoded result:\n{result}")
+
+    elif choice == '2':
+        data = input(Fore.CYAN + "\nEnter text to decode: " + Style.RESET_ALL)
+        print(Fore.CYAN + "\nChoose decoding type:")
+        print("[1] Base64")
+        print("[2] Hex")
+        dec_choice = input(Fore.CYAN + "\nYour choice: " + Style.RESET_ALL)
+
+        try:
+            if dec_choice == '1':
+                result = base64.b64decode(data).decode(errors='replace')
+            elif dec_choice == '2':
+                result = bytes.fromhex(data).decode(errors='replace')
+            else:
+                print(Fore.RED + "[!] Invalid decoding choice.")
+                return_to_menu()
+                return
+            print(Fore.GREEN + f"\nDecoded result:\n{result}")
+        except Exception as e:
+            print(Fore.RED + f"[!] Error decoding: {e}")
+
+    else:
+        print(Fore.RED + "[!] Invalid option.")
+
+    return_to_menu()
+
+
+
+def subdomain_finder():
+    check_os()
+    print(Fore.CYAN + banner)
+    print(Fore.CYAN + "Subdomain Finder (crt.sh)" + Style.RESET_ALL)
+    domain = input(Fore.CYAN + "\nEnter the main domain (example : example.com): " + Style.RESET_ALL).strip()
+
+    url = f"https://crt.sh/?q=%25.{domain}&output=json"
+    print(Fore.CYAN + f"\nQuerying crt.sh for subdomains of {domain}...\n" + Style.RESET_ALL)
+
+    try:
+        resp = requests.get(url, timeout=15)
+        if resp.status_code != 200:
+            print(Fore.RED + f"Error fetching data from crt.sh (status {resp.status_code})" + Style.RESET_ALL)
+            return
+
+        data = resp.json()
+        subdomains = set()
+
+        for entry in data:
+            name_value = entry.get("name_value", "")
+            for sub in name_value.split("\n"):
+                sub = sub.strip()
+                if sub.endswith(domain):
+                    subdomains.add(sub.lower())
+
+        if not subdomains:
+            print(Fore.RED + "No subdomains found." + Style.RESET_ALL)
+        else:
+            print(Fore.GREEN + f"Found {len(subdomains)} unique subdomains:\n" + Style.RESET_ALL)
+            for sd in sorted(subdomains):
+                print(Fore.GREEN + sd + Style.RESET_ALL)
+
+    except Exception as e:
+        print(Fore.RED + f"Error during request or parsing: {e}" + Style.RESET_ALL)
+
+    return_to_menu()
+
+
 def main():
     check_os()
     print(Fore.CYAN + banner)
-    print(Fore.WHITE + "[" + Fore.CYAN + "1" + Fore.WHITE + "]" + Fore.CYAN + " IP Lookup")
-    print(Fore.WHITE + "[" + Fore.CYAN + "2" + Fore.WHITE + "]" + Fore.CYAN + " Port Scanner")
+    print(Fore.WHITE + "[" + Fore.CYAN + "1" + Fore.WHITE + "]" + Fore.CYAN + " IP Lookup" + "              " + Fore.WHITE + "[" + Fore.CYAN + "8" + Fore.WHITE + "]" + Fore.CYAN + " Encode/Decode")
+    print(Fore.WHITE + "[" + Fore.CYAN + "2" + Fore.WHITE + "]" + Fore.CYAN + " Port Scanner" + "           " + Fore.WHITE + "[" + Fore.CYAN + "9" + Fore.WHITE + "]" + Fore.CYAN + " Subdomain Finder")
     print(Fore.WHITE + "[" + Fore.CYAN + "3" + Fore.WHITE + "]" + Fore.CYAN + " Scan IP Range")
     print(Fore.WHITE + "[" + Fore.CYAN + "4" + Fore.WHITE + "]" + Fore.CYAN + " IP Pinger")
+    print(Fore.WHITE + "[" + Fore.CYAN + "5" + Fore.WHITE + "]" + Fore.CYAN + " Username Tracker")
+    print(Fore.WHITE + "[" + Fore.CYAN + "6" + Fore.WHITE + "]" + Fore.CYAN + " Email Lookup (HIBP)")
+    print(Fore.WHITE + "[" + Fore.CYAN + "7" + Fore.WHITE + "]" + Fore.CYAN + " Phone Lookup")
     menu = input(Fore.CYAN + "\n\nroot@Z9ATools:~# " + Style.RESET_ALL)
 
     if menu == '1':
@@ -165,6 +393,16 @@ def main():
         scan_ip_range()
     elif menu == '4':
         ip_pinger()
+    elif menu == '5':
+        username_tracker()
+    elif menu == '6':
+        email_lookup()
+    elif menu == '7':
+        phone_lookup()
+    elif menu == '8':
+        encode_decode()
+    elif menu == '9':
+        subdomain_finder()
     else:
         print(Fore.RED + "\n[!] Invalid option.")
         time.sleep(1)
