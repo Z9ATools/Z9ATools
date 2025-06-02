@@ -6,17 +6,23 @@
   <img src="https://img.shields.io/badge/Python-100%25-00FFFF?style=flat&labelColor=1a1a1a" />
 </p>
 
-# 🔥Z9A Tools
+# 🔥 Z9A Tools
 
 **Z9A Hacking Tools is for legal and ethical use only. We are not responsible for your actions.**
-## 🔥 Z9A Tools V1.0 currently contains :
-  ### 1 - IP Lookup
-  ### 2 - Port Scanner
-  ### 3 - IP Range Scanner
-  ### 4 - IP Pinger
+## 🔥 Z9A Tools V1.1 currently contains :
+### - IP Lookup
+### - Port Scanner            
+### - IP Range Scanner
+### - IP Pinger
+### - Username Tracker
+### - Email Lookup (HIBP)
+### - Phone Lookup
+### - Encode/Decode
+### - Subdomain Finder
 
-## Tools 
-![image](https://github.com/user-attachments/assets/7508979a-e3c0-4822-bd3e-29cf8d026f4c)
+## 🔥 Tools 
+
+![image](https://github.com/user-attachments/assets/05657dd0-fe43-4473-87ba-4086ec80600c)
 
 
 ## 🔥 Installation
