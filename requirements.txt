@@ -1,11 +1,4 @@
-os
 colorama
 ipinfo
 requests
-time
-socket
-subprocess
-ipaddress
 phonenumbers
-hashlib
-base64
