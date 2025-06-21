@@ -11,6 +11,7 @@ import phonenumbers
 from phonenumbers import geocoder, carrier
 import hashlib
 import base64
+import itertools
 
 def check_os():
     if os.name == 'nt':
@@ -20,16 +21,16 @@ def check_os():
 
 banner = """
 
-::::::::: ::::::::      :::          ::::::::::: ::::::::   ::::::::  :::        ::::::::  
-     :+: :+:    :+:   :+: :+:            :+:    :+:    :+: :+:    :+: :+:       :+:    :+: 
-    +:+  +:+    +:+  +:+   +:+           +:+    +:+    +:+ +:+    +:+ +:+       +:+        
-   +#+    +#++:++#+ +#++:++#++:          +#+    +#+    +:+ +#+    +:+ +#+       +#++:++#++ 
-  +#+           +#+ +#+     +#+          +#+    +#+    +#+ +#+    +#+ +#+              +#+ 
- #+#     #+#    #+# #+#     #+#          #+#    #+#    #+# #+#    #+# #+#       #+#    #+# 
-######### ########  ###     ###          ###     ########   ########  ########## ########  
+            ::::::::: ::::::::      :::          ::::::::::: ::::::::   ::::::::  :::        ::::::::  
+                 :+: :+:    :+:   :+: :+:            :+:    :+:    :+: :+:    :+: :+:       :+:    :+: 
+                +:+  +:+    +:+  +:+   +:+           +:+    +:+    +:+ +:+    +:+ +:+       +:+        
+               +#+    +#++:++#+ +#++:++#++:          +#+    +#+    +:+ +#+    +:+ +#+       +#++:++#++ 
+              +#+           +#+ +#+     +#+          +#+    +#+    +#+ +#+    +#+ +#+              +#+ 
+             #+#     #+#    #+# #+#     #+#          #+#    #+#    #+# #+#    #+# #+#       #+#    #+# 
+            ######### ########  ###     ###          ###     ########   ########  ########## ########  
                                              
 
-                    Telegram | t.me/Z9ATools
+                                Telegram | t.me/Z9ATools
 """
 
 def return_to_menu():
@@ -219,7 +220,7 @@ def email_lookup():
     }
 
     print(Fore.CYAN + f"\n[+] Checking data breaches for: {email}\n")
-    time.sleep(1.6)  # Respect rate limit (1.5s)
+    time.sleep(1.6)  # 1.6 rate limit
 
     try:
         response = requests.get(url, headers=headers, params={"truncateResponse": False})
@@ -373,16 +374,82 @@ def subdomain_finder():
     return_to_menu()
 
 
+def wordlist_gen_mrrobot():
+    check_os()
+    print(Fore.CYAN + banner)
+    print(Fore.YELLOW + "\n[~] Wordlist Generator — Personal Info Based\n" + Style.RESET_ALL)
+
+    first = input("First name: ").strip()
+    last = input("Last name: ").strip()
+    nickname = input("Nickname / username: ").strip()
+    birth_year = input("Year of birth (e.g. 2012): ").strip()
+    birth_day = input("Day and month (e.g. 1204 or April12): ").strip()
+    pet = input("Pet name: ").strip()
+    partner = input("Partner name: ").strip()
+    city = input("City / hometown: ").strip()
+    company = input("Company / school: ").strip()
+    fav = input("Favorite word / phrase: ").strip()
+
+    inputs = [first, last, nickname, birth_year, birth_day, pet, partner, city, company, fav]
+    elements = [e for e in inputs if e]
+
+    def case_variants(w):
+        return {w.lower(), w.upper(), w.capitalize()}
+
+    def partials(w):
+        return {w[:i] for i in range(1, len(w)+1)}
+
+    def combine_all(elements, max_len=4):
+        result = set()
+        for r in range(1, max_len+1):
+            for combo in itertools.permutations(elements, r):
+                joined = ''.join(combo)
+                result.add(joined)
+        return result
+
+    suffixes = ['123', '1234', '007', '!', '@', '?', '#']
+    if birth_year:
+        suffixes += [birth_year, birth_year[-2:], '19'+birth_year[-2:], '20'+birth_year[-2:]]
+
+    base_parts = set()
+    for word in elements:
+        base_parts.update(partials(word))
+        base_parts.add(word)
+
+    all_variants = set()
+    for part in base_parts:
+        all_variants.update(case_variants(part))
+
+    combined_words = combine_all(all_variants, max_len=3)
+
+    full_set = set()
+    for word in combined_words:
+        full_set.add(word)
+        for suf in suffixes:
+            full_set.add(word + suf)
+            full_set.add(suf + word)
+
+    full_set = {w for w in full_set if len(w) >= 4}
+
+    with open("wordlist.txt", "w", encoding="utf-8") as f:
+        for word in sorted(full_set):
+            f.write(word + "\n")
+
+    print(Fore.GREEN + f"\n[✓] Wordlist saved as 'wordlist.txt' with {len(full_set)} entries.")
+    return_to_menu()
+
+
+
 def main():
     check_os()
     print(Fore.CYAN + banner)
-    print(Fore.WHITE + "[" + Fore.CYAN + "1" + Fore.WHITE + "]" + Fore.CYAN + " IP Lookup" + "              " + Fore.WHITE + "[" + Fore.CYAN + "8" + Fore.WHITE + "]" + Fore.CYAN + " Encode/Decode")
-    print(Fore.WHITE + "[" + Fore.CYAN + "2" + Fore.WHITE + "]" + Fore.CYAN + " Port Scanner" + "           " + Fore.WHITE + "[" + Fore.CYAN + "9" + Fore.WHITE + "]" + Fore.CYAN + " Subdomain Finder")
-    print(Fore.WHITE + "[" + Fore.CYAN + "3" + Fore.WHITE + "]" + Fore.CYAN + " Scan IP Range")
-    print(Fore.WHITE + "[" + Fore.CYAN + "4" + Fore.WHITE + "]" + Fore.CYAN + " IP Pinger")
-    print(Fore.WHITE + "[" + Fore.CYAN + "5" + Fore.WHITE + "]" + Fore.CYAN + " Username Tracker")
-    print(Fore.WHITE + "[" + Fore.CYAN + "6" + Fore.WHITE + "]" + Fore.CYAN + " Email Lookup (HIBP)")
-    print(Fore.WHITE + "[" + Fore.CYAN + "7" + Fore.WHITE + "]" + Fore.CYAN + " Phone Lookup")
+    print(Fore.WHITE + "            [" + Fore.CYAN + "1" + Fore.WHITE + "]" + Fore.CYAN + " IP Lookup" + "              " + Fore.WHITE + "[" + Fore.CYAN + "8" + Fore.WHITE + "]" + Fore.CYAN + " Encode/Decode")
+    print(Fore.WHITE + "            [" + Fore.CYAN + "2" + Fore.WHITE + "]" + Fore.CYAN + " Port Scanner" + "           " + Fore.WHITE + "[" + Fore.CYAN + "9" + Fore.WHITE + "]" + Fore.CYAN + " Subdomain Finder")
+    print(Fore.WHITE + "            [" + Fore.CYAN + "3" + Fore.WHITE + "]" + Fore.CYAN + " Scan IP Range" + "          " + Fore.WHITE + "[" + Fore.CYAN + "10" + Fore.WHITE + "]" + Fore.CYAN + " Wordlist Generator")
+    print(Fore.WHITE + "            [" + Fore.CYAN + "4" + Fore.WHITE + "]" + Fore.CYAN + " IP Pinger")
+    print(Fore.WHITE + "            [" + Fore.CYAN + "5" + Fore.WHITE + "]" + Fore.CYAN + " Username Tracker")
+    print(Fore.WHITE + "            [" + Fore.CYAN + "6" + Fore.WHITE + "]" + Fore.CYAN + " Email Lookup (HIBP)")
+    print(Fore.WHITE + "            [" + Fore.CYAN + "7" + Fore.WHITE + "]" + Fore.CYAN + " Phone Lookup")
     menu = input(Fore.CYAN + "\n\nroot@Z9ATools:~# " + Style.RESET_ALL)
 
     if menu == '1':
@@ -403,6 +470,8 @@ def main():
         encode_decode()
     elif menu == '9':
         subdomain_finder()
+    elif menu == '10':
+        wordlist_gen_mrrobot()
     else:
         print(Fore.RED + "\n[!] Invalid option.")
         time.sleep(1)
