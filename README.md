@@ -9,7 +9,7 @@
 # 🔥 Z9A Tools
 
 **Z9A Hacking Tools is for legal and ethical use only. We are not responsible for your actions.**
-## 🔥 Z9A Tools V1.1 currently contains :
+## 🔥 Z9A Tools V1.2 currently contains :
 ### - IP Lookup
 ### - Port Scanner            
 ### - IP Range Scanner
