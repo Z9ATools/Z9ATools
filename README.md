@@ -19,10 +19,11 @@
 ### - Phone Lookup
 ### - Encode/Decode
 ### - Subdomain Finder
+### - Wordlist Generator 
 
 ## 🔥 Tools 
 
-![image](https://github.com/user-attachments/assets/05657dd0-fe43-4473-87ba-4086ec80600c)
+![image](https://github.com/user-attachments/assets/af2ab4ba-8a38-4771-aed5-368f65b0bd25)
 
 
 ## 🔥 Installation
